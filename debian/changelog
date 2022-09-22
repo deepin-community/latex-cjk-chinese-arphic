@@ -1,0 +1,399 @@
+latex-cjk-chinese-arphic (1.23+nmu1) unstable; urgency=medium
+
+  * Non maintainer upload by the Reproducible Builds team.
+  * No source change upload to rebuild on buildd with .buildinfo files.
+
+ -- Holger Levsen <holger@debian.org>  Wed, 30 Dec 2020 00:32:21 +0100
+
+latex-cjk-chinese-arphic (1.23) unstable; urgency=low
+
+  * The "Descriptive descriptions" release.
+  * [copyright.in]
+     - Change copyright year and my mail address;
+     - use Copyright Format 1.0.
+  * Bug fix: "descripton of this package is misleading", thanks to Liu
+    Binsheng (Closes: #666395).
+    - [control*]
+      - Fix the templates that generate debian/control.
+  * Bug fix: "outdated embedded data copy: aglfn", thanks to Paul Wise
+    (Closes: #709585).
+    - [control*, latex-cjk/aglfn13.txt, latex-cjk/makefdx.pl,
+       copyright.in, README.Debian]
+       - Remove latex-cjk/aglfn13.txt (v1.1) and depend on the `aglfn'
+         Debian package which contains version 1.7 of the Adobe Glyph
+         List For New Fonts.  Update latex-cjk/makefdx.pl to point to
+         the aglfn.txt file from the `aglfn' package.
+  * [compat]
+     - Bump up version from v7 to v9.
+  * [control.stem.in]
+     - Bump up Standards-Version from 3.8.3 to 3.9.4; changes: build-indep
+       and build-arch are now required in d/rules.
+  * [rules]
+     - Switch from dh_clean to dh_prep;
+     - add a "sed" line to replace @PROVIDESFILE@ in font.fd.in;
+     - insert build-indep and build-arch targets; let's hope I did it
+       correctly.
+  * [font.fd.in]
+     - Change the hard-coded "c70gkai.fd" into @PROVIDESFILE@.
+
+ -- Danai SAE-HAN (韓達耐) <danai@debian.org>  Sat, 06 Jul 2013 00:18:51 +0800
+
+latex-cjk-chinese-arphic (1.22) unstable; urgency=low
+
+  * change maintainer to debian-tex-maint ML
+  * add myself and Danai as uploaders
+  * ack nmu (Closes: #646647)
+  * fix location of sfd files for new texlive
+  * rebuild with tex-common v3
+  * remove old conf files in updmap.d (debian/*.maintscript)
+
+ -- Norbert Preining <preining@debian.org>  Thu, 22 Mar 2012 18:39:47 +0900
+
+latex-cjk-chinese-arphic (1.21+nmu1) unstable; urgency=low
+
+  * Non-maintainer upload.
+
+  [ Hideki Yamane ]
+  * debian/control
+    - update font package name (ttf-*->fonts-*)
+  * debian/rules
+    - deal with changes in font packages (Closes: #646647)
+
+ -- gregor herrmann <gregoa@debian.org>  Sun, 19 Feb 2012 17:42:37 +0100
+
+latex-cjk-chinese-arphic (1.21) unstable; urgency=medium
+
+  * The "Welcome to TeX Live 2009" release.
+  * Set the urgency to medium, because it fixes an FTBFS bug.
+  * [rules]
+     - Do not show some of the more technical comments on the
+       terminal;
+     - add "ttf2pk/" to the sfddir variable because the upstream
+       path to the Subfont Definition (SFD) files has changed.
+       This fixes "FTBFS: No Sub Font Definition file", thanks to
+       Lucas Nussbaum (Closes: #562395).
+  * [control] Because of bug #562395, this package now depends
+     on texlive-font-utils (>= 2009-4).
+
+ -- Danai SAE-HAN (韓達耐) <danai@debian.org>  Sat, 09 Jan 2010 14:12:10 +0100
+
+latex-cjk-chinese-arphic (1.20) unstable; urgency=medium
+
+  * The "OMG, am I really a DD now?!" release.
+  * Set the urgency to medium, because it fixes an FTBFS bug.
+  * [rules]
+     - Fix some more bashisms which cause an FTBFS.  Thanks to Raphael
+       Geissert and Lucas Nussbaum (Closes: #535389, #543020);
+     - change copyright from 2008 to 2009.
+  * [font.fd.in]
+     - Add \CJKnormal to the {m}{n} regular shape to all fonts that use
+       \CJKbold because NFSS doesn't call \selectfont when substituting
+       fonts, and therefore the \CJK@bold@ does not reset.  Fix from the
+       upstream author of the CJK package;
+     - update file version to 4.8.1 and date to 2008-10-03.
+  * [control.stem.in]
+     - Build-depend on tex-common (>= 1.20) to get trigger support;
+     - bump to Standards-Version from 3.8.0 to 3.8.3 (no changes).
+  * [control.leaf.in] Do not depend on tex-common anymore, but use
+     ${misc:Depends} instead.
+  * [latex-cjk/*] Get latest upstream version of the CJK scripts (4.8.2).
+  * [changelog] Change the maintainer's email address.
+  * [TODO] Remove the todo about skewed (i.e. italics) glyphs because
+     the result is rather ugly.
+
+ -- Danai SAE-HAN (韓達耐) <danai@debian.org>  Thu, 29 Oct 2009 00:46:23 +0100
+
+latex-cjk-chinese-arphic (1.19) unstable; urgency=medium
+
+  * The "Where art thou, oh vertical fonts" release.
+  * Urgency set to medium, as this release fixes an FTBFS bug.
+  * [rules]
+     - Fix problem in the $(clean_fonts) rule when running target "clean"
+       with -j: some debian/control entries could be missing.  Thanks to
+       Lucas Nussbaum for the patch (Closes: #465635);
+     - with debhelper V7 you don't need to manually remove the *-stamp
+       files anymore;
+     - replace "dh_clean -k" with "dh_prep";
+     - README.Debian was installed by dh_installdocs only in the first
+       binary package that appeared in debian/control.  Install this file
+       in all four binary packages;
+     - bump copyright to 2008, and change from GPLv2 to GPLv2+;
+     - remove the exhaustive error and log handling;
+     - only build support for vertical writing for fonts that actually do
+       have a proper GSUB table, to know "bsmi" and "bkai"; "gbsn" and "gkai"
+       don't, so we compile the vertical fonts for gbsn and gkai with pltotf
+       and vptovf.
+  * [copyright.in]
+     - Bump copyright to 2008;
+     - change the link to /usr/share/common-licenses/GPL-2 instead of /GPL,
+       which is now symlinked to /GPL-3.
+  * [compat] Bump debhelper compatibility to level 7.
+  * [control.stem.in]
+     - Depend on debhelper (>= 7);
+     - bump Standards-Version from 3.7.3 to 3.8.0;
+     - fix package descriptions for bsmi, gbsn and gkai.  Thanks to
+       FENG Yu-ning (Closes: #478078);
+     - Bug fix: Build-Depend-Indep on texlive-font-utils (>= 2007.dfsg.2)
+       instead of the deprecated freetype1-tools.  Thanks to Norbert Preining
+       and madcoder (Closes: #484081);
+     - add "sharutils" to the Build-Depends-Indep list to unpack the vertical
+       fonts;
+     - build-depend on tex-common version 1.11.2 or higher, which fixes a
+       debhelper and Emacs error.  Thanks to Norbert Preining;
+     - switch from Xs-Vcs-* to Vcs-*;
+     - use the correct SVN address from Debian Alioth, not from
+       upstream's GIT repository.
+  * [gbsn*,gkai*] I got these files from versions 1.18 and 1.15, when the
+     Fontforge scripts didn't bail out if the TTF didn't contain a valid GSUB
+     table.
+  * [TODO] Add a reminder that I should either fix the vertical support for
+     gbsn and gkai, or either completely remove support for it.
+  * [README.Debian] Update dependencies.
+  * [watch] Remove this file; it is of no use, because the Arphic fonts will
+     never be updated again, and because this package is a Debian native
+     package.
+  * Changes by the sponsor, Norbert Preining:
+     [README.Debian] Fix the location of the SFD fonts.
+     [rules] Fix the location of the SFD fonts.
+     [control] Remove double occurrence of texlive-font-utils in the
+      build-depends-indep.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>  Sat, 16 Aug 2008 23:40:16 +0200
+
+latex-cjk-chinese-arphic (1.18) unstable; urgency=low
+
+  * The "I love vertical writing" release.
+  * [changelog]
+     - Remove a superfluous item from 1.17;
+     - typo in 1.17.
+  * [latex-cjk/makefdx.pl] Remove hoffset again.  This setting
+     is applied not only after \CJKhorz, but after \CJKvert, which
+     isn't exactly what we want.
+  * [latex-cjk/{*.pe,*.pl}] Upstream update.
+  * [control.stem.in]
+     - Build-Depend on fontforge (>= 0.0.20071105);
+     - bump Standards-Version from 3.7.2.0 to 3.7.3;
+     - depend on debhelper (>= 6).
+  * [compat] Move to debhelper compatibility level 6.
+  * [rules]
+     - makefdx.pl now requires an extra "encoding" argument.
+       Also use the "-u" flag when creating Unicode .fdx files;
+     - use $(MY_DH_OPTIONS) instead of $(DH_OPTIONS).  Now it shouldn't
+       break anymore on parallel computers, making the compilation much
+       faster.  Thanks to Lucas Nussbaum (Closes: #458740);
+     - removed a possible bashism, changing "{,x}" into "*".
+  * [*.preinst] dh_installtex has moved the default priority from 10 to
+     20, rendering the /etc/texmf/updmap.d/10latex-cjk-chinese*.cfg
+     conffiles obsolete.  This script will create a backup in
+     /etc/texmf/updmap.d/ if you have manually modified any of the 10*.cfg
+     file.  Thanks to Kumar Appaiah
+     (Closes: #455461, #455462, #455463, #455464).
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>  Mon, 28 Jan 2008 19:04:36 +0100
+
+latex-cjk-chinese-arphic (1.17) unstable; urgency=medium
+
+  * Set urgency to "medium" to fix two FTBFS bugs.
+  * [latex-cjk/vert*.pe] Remove the line with SelectByAtt, which has been
+      made deprecated upstream.  This fixes "FTBFS: Fontforge doesn't
+      support SelectByATT anymore" (Closes: #424999).
+  * [control.stem.in]
+     - Remove "tetex-bin" in Build-Depends-Indep.
+       This fixes "FTBFS: latex-cjk-chinese-arphic-bsmi00lp missing files
+       (build/bsmi00lp/bsmilp*.tfm), aborting" (Closes: #422828).
+       Thanks to Michael Ablassmeier and Lucas Nussbaum;
+     - put "debhelper" in Build-Depends, the rest of the packages in
+       Build-Depends-Indep.  Thanks to Florent Rougon;
+     - minor cleanups.
+  * [rules]
+     - Some of the logs weren't directed yet to $(builddir)/;
+     - add a few arguments after "dh_testdir" when cleaning, to make
+       sure we're deleting the correct directory.  Thanks to Florent Rougon.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>  Thu, 14 Jun 2007 17:03:02 +0200
+
+latex-cjk-chinese-arphic (1.16) unstable; urgency=low
+
+  * The "Circular dependencies go poof" release.
+  * [control]
+     - don't depend on latex-cjk-chinese.
+       Thanks to Bill Allombert. (Closes: #396214);
+     - reverse the order of the build-dependency on TeX packages,
+       making TeXlive the preferred flavour;
+     - remove the conflict (versioned) with and the replacement (unversioned)
+       of tfm-arphic-@TYPEFACE@ (= 2.11.2-0.1), since they have now been
+       removed in Debian/testing;
+     - remove the virtual packages tfm-arphic-@TYPEFACE@.  A "Provides:" tag
+       should be sufficient.
+  * [rules]
+     - fix typo in a comment;
+     - don't redirect all the output to build/[font]/log, but also
+       to stdout (using "tee"), making sure that tools like piuparts
+       don't interpret the hour-long builds with inactivity.
+       (Closes: #398517).  Thanks to Lucas Nussbaum;
+     - output the current command also to the logfile.  This makes it
+       easier to trace bugs;
+     - change wording of the comments, to make it clear that compiling
+       these fonts will take a day, not just hours; thanks to
+       Werner LEMBERG.
+  * [README.Debian] add a new section about how to get GBK fonts as well,
+     taking the Arphic fonts as an example.  In the near future I will
+     merge this info with the Cyberbit section into one document in the
+     latex-cjk-common package.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>  Mon,  5 Feb 2007 01:14:57 +0100
+
+latex-cjk-chinese-arphic (1.15) unstable; urgency=medium
+
+  * The "Remove tfm-arphic" release.
+  * Medium urgency because it fixes two RC bugs.
+  * [changelog] remove "debian/" in the square brackets.
+     It improves my efficiency with 0,1%.
+  * [control.leaf.in]
+      add tfm-arphic-* to each package's Replaces: list.
+      The switch closes several bugs. (Closes: #190800, #285432,
+      #309074, #391261, #392555, #392948, #393278, #393279, #393281,
+      #393282, #395343)
+  * [README.Debian] mention that switching to the new Type1 fonts
+     requires the old PK fonts to be removed ~/.texmf-var/.
+  * [rules] according to Debian Policy section 4.6, it is advised
+     to use a double ampersand instead of a semicolon because of
+     "sh"'s poor error trapping.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>  Sun, 29 Oct 2006 02:00:04 +0100
+
+latex-cjk-chinese-arphic (1.14) unstable; urgency=low
+
+  * [rules,README.Debian] change my email address.
+  * [copyright.in]
+     - change my email address;
+     - include the full Arphic Public License (thanks Jeroen van Wolffelaar).
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>  Sat,  7 Oct 2006 00:09:09 +0200
+
+latex-cjk-chinese-arphic (1.13) unstable; urgency=low
+
+  * The "Changing email address" release.
+  * [rules] small aesthetic changes.
+  * [changelog]
+     - aesthetic changes in sync with the "cjk" Debian source package;
+     - change the maintainer's email address to @edpnet.be.
+  * [control] change the maintainer's email address.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>  Wed,  6 Sep 2006 06:52:05 +0200
+
+latex-cjk-chinese-arphic (1.12) unstable; urgency=low
+
+  * [control.leaf.in] change "any" to "all" again.  I forgot that
+     the debian/control file gets overwritten at every build.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Tue,  8 Aug 2006 09:30:36 +0200
+
+latex-cjk-chinese-arphic (1.11) unstable; urgency=low
+
+  * The "Thank you Frank" release.
+  * Upload sponsored by Frank Küster <frank@debian.org>.
+  * [control.stem.in]
+     - added Build-Depends on tetex-bin (>= 3.0) | texlive-font-utils.
+       pbuilder should work now.
+     - build-depend on the official freetype1-tools (>= 1.4pre.20050518-0.3)
+       package instead of mine.
+  * [rules] add error trapping because everything is redirected to
+     $(builddir)/log.  Now, when a build fails, the log will be
+     shown completely on screen.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Sun, 23 Jul 2006 07:17:44 +0200
+
+latex-cjk-chinese-arphic (1.10) unstable; urgency=low
+
+  * [copyright] specifically mention that debian/ is released
+     under the GPL.  Thanks to Frank Küster.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Thu, 18 May 2006 23:07:08 +0200
+
+latex-cjk-chinese-arphic (1.9) unstable; urgency=low
+
+  * [control.stem.in] really bump up the Standards Version to 3.7.2.0.
+     Doh.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Sat, 13 May 2006 09:21:16 +0200
+
+latex-cjk-chinese-arphic (1.8) unstable; urgency=low
+
+  * [control] bump the Standards Version to 3.7.2.0: no changes
+     required.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Mon,  8 May 2006 01:34:24 +0200
+
+latex-cjk-chinese-arphic (1.7) experimental; urgency=low
+
+  * [control*] depend on tex-common (>=0.19) because of a typo
+     in dh_installtex.  Thanks to Norbert Preining.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Wed, 13 Mar 2006 19:37:20 +0100
+
+latex-cjk-chinese-arphic (1.6) experimental; urgency=low
+
+  * [rules] oh dear, I installed the .fd font definition files
+     of gkai and gbsn in Bg5/, not in GB/.  Thanks to CHEN Haifeng.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Thu,  2 Mar 2006 07:56:02 +0100
+
+latex-cjk-chinese-arphic (1.5) experimental; urgency=low
+
+  * [control*] add a conflict tfm-arphic-@TYPEFACE@ (=2.11.2-0.1)
+     otherwise the package would conflict with itself.  Duh...
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Mon, 27 Feb 2006 15:35:01 +0100
+
+latex-cjk-chinese-arphic (1.4) experimental; urgency=low
+
+  * [control*] depend on tex-common (>=0.18), because
+     dh_installtexfonts is now replaced by the more versatile
+     dh_installtex command.
+  * [rules] use dh_installtex from now on.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Sat, 25 Feb 2006 00:19:18 +0100
+
+latex-cjk-chinese-arphic (1.3) experimental; urgency=low
+
+  * [control] change architecture from "any" to "all"
+     (thanks Ming Hua).
+  * [control] add tfm-arphic-* to each package's Provides: list
+     (thanks Anthony Fok).
+  * [changelog] change "unstable" into "experimental".
+  * [rules] remove a few bashisms, and clean it up somewhat.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Sat,  7 Jan 2006 00:12:02 +0100
+
+latex-cjk-chinese-arphic (1.2) experimental; urgency=low
+
+  * Move map files from /etc/texmf/map/dvips/arphic/ to
+    /usr/share/texmf-tetex/fonts/map/dvips/arphic/.
+  * Depend on tex-common (>=0.14) because it fixes a bug 
+    with dh_installtexfonts when it creates the config.* files.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Thu, 28 Dec 2005 22:06:43 +0100
+
+latex-cjk-chinese-arphic (1.1) experimental; urgency=low
+
+  * Aaargh!  Typo in debian/control: depend on tex-common (>=0.13).
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Sat, 17 Dec 2005 05:27:09 +0100
+
+latex-cjk-chinese-arphic (1.0) experimental; urgency=low
+
+  * Build the TFM, Type1, AFM and VF fonts using Werner Lemberg's
+    fontforge scripts.
+  * Depend on fontforge (>=0.0.20050717).
+  * Make this package dependent on freetype1-tools: only the .sfd files
+    are important.  ttfonts.map nor ttf2pk from freetype1-tools aren't
+    used anymore.
+  * The path of the SFD files (/usr/share/texmf/fonts/sfd) has changed
+    with TDS version 1.1.  Depend on a newer version of freetype1-tools
+    (>=1.4pre.20030402-2).
+  * Depend on ttf-arphic-* for the TrueType Fonts.
+    Conflict with the older tfm-arphic-* packages.
+  * Use the new dh_installtexfonts to install the font maps.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>  Thu,  1 Dec 2005 12:45:10 +0100

@@ -1,0 +1,290 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# debian/rules file
+# GNU GPL v2 or higher, Copyright (C) 2005-2012, Danai SAE-HAN (韓達耐) <danai@debian.org>
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# Support parallel builds when available.
+# Cfr. Debian bugs #209008 and #458740.
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+    MAKEFLAGS += -j$(NUMJOBS)
+endif
+
+
+# Arphic PL fonts information
+
+fonts = bsmi bkai gbsn gkai
+
+bsmi_typeface = bsmi00lp
+bsmi_namestem = bsmi
+bsmi_sfdnamestem = bsmilp
+bsmi_uninamestem = bsmiu
+bsmi_familyname = AR PL Mingti2L Big5
+bsmi_encoding = UBig5
+bsmi_hoffset = -0.12em
+bsmi_vertical = yes
+
+bkai_typeface = bkai00mp
+bkai_namestem = bkai
+bkai_sfdnamestem = bkaimp
+bkai_uninamestem = bkaiu
+bkai_familyname = AR PL KaitiM Big5
+bkai_encoding = UBig5
+bkai_hoffset = -0.12em
+bkai_vertical = yes
+
+gbsn_typeface = gbsn00lp
+gbsn_namestem = gbsn
+gbsn_sfdnamestem = gbsnlp
+gbsn_uninamestem = gbsnu
+gbsn_familyname = AR PL SungtiL GB
+gbsn_encoding = UGB
+gbsn_hoffset = -0.12em
+gbsn_vertical = no
+
+gkai_typeface = gkai00mp
+gkai_namestem = gkai
+gkai_sfdnamestem = gkaimp
+gkai_uninamestem = gkaiu
+gkai_familyname = AR PL KaitiM GB
+gkai_encoding = UGB
+gkai_hoffset = -0.12em
+gkai_vertical = no
+
+cjk_fontencoding = 0
+UBig5_planes = 55
+UBig5_inputencoding = 0
+UBig5_texinput = usr/share/texmf/tex/latex/CJK/Bg5/
+UBig5_codingscheme = cjkbig5
+UGB_planes = 35
+UGB_inputencoding = 1
+UGB_texinput = usr/share/texmf/tex/latex/CJK/GB/
+UGB_codingscheme = cjkgb
+
+fonttype = truetype
+supplier = arphic
+
+typeface = $($(abbrev)_typeface)
+familyname = $($(abbrev)_familyname)
+encoding = $($(abbrev)_encoding)
+namestem = $($(abbrev)_namestem)
+sfdnamestem = $($(abbrev)_sfdnamestem)
+uninamestem = $($(abbrev)_uninamestem)
+planes = $($(encoding)_planes)
+nfss_fontencoding = $($(encoding)_inputencoding)$(cjk_fontencoding)
+codingscheme = $($(encoding)_codingscheme)
+bin-package = latex-cjk-chinese-$(supplier)-$(typeface)
+binary_fonts = $(addprefix binary_,$(fonts))
+build-stamp_fonts = $(addprefix build-stamp.,$(fonts))
+install_fonts = $(addprefix install_,$(fonts))
+clean_fonts = $(addprefix clean_,$(fonts))
+vertical = $($(abbrev)_vertical)
+
+# Path names
+
+d = debian/$(bin-package)
+texmf = usr/share/texmf
+fontpath = usr/share/fonts/$(fonttype)
+dest_texfontpath = $(texmf)/fonts/$(fonttype)/$(supplier)
+dest_afmpath = $(texmf)/fonts/afm/$(supplier)/$(uninamestem)
+dest_type1path = $(texmf)/fonts/type1/$(supplier)/$(uninamestem)
+dest_uni-tfmpath = $(texmf)/fonts/tfm/$(supplier)/$(uninamestem)
+dest_sfd-tfmpath = $(texmf)/fonts/tfm/$(supplier)/$(sfdnamestem)
+dest_vfpath = $(texmf)/fonts/vf/$(supplier)/$(namestem)
+dest_docpath = usr/share/doc/texmf/fonts/$(fonttype)/$(supplier)
+dest_fd = $($(encoding)_texinput)
+builddir = build/$(typeface)
+sfddir = /usr/share/texlive/texmf-dist/fonts/sfd/ttf2pk
+
+
+# Since Debian standards version 3.9.4 the build-* targets are
+# required.  This package does not compile any programs, it
+# only converts fonts from one format to another.
+# Hence I deem it more useful to keep the whole font-building
+# process in the corresponding "binary-*" targets.
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
+
+build-stamp: $(build-stamp_fonts)
+	dh_testdir
+
+# Add here commands to compile the package.
+
+	touch build-stamp
+
+$(build-stamp_fonts): abbrev = $(patsubst build-stamp.%,%,$@)
+$(build-stamp_fonts):
+	dh_testdir
+	mkdir -p $(builddir)
+	( cd $(builddir) && ln -s /$(fontpath)/$(supplier)-$(typeface)/$(typeface).ttf && cp ../../debian/latex-cjk/* . )
+
+	# You will find a detailed log of the build process in $(builddir)/log.
+
+	# Create Unicode encoded subfonts `$(uninamestem)00' .. `$(uninamestem)ff'.
+	# This will take a lot of hours.  Make yourself a nice day.
+	( cd $(builddir) && fontforge -script subfonts.pe $(typeface).ttf $(uninamestem) $(sfddir)/Unicode.sfd )
+	@echo
+
+
+	# Create font `$(uninamestem)v' with all vertical glyph representation forms.
+	if [ $(vertical) = "yes" ]; \
+	then ( cd $(builddir) && fontforge -script vertical.pe $(typeface).ttf $(uninamestem)v ); \
+	fi
+	@echo
+
+	# Create font `$(uninamestem)vr' which has the same structure as `$(uninamestem)v',
+	# but normal glyphs instead of vertical representation forms.
+	if [ $(vertical) = "yes" ]; \
+	then ( cd $(builddir) && fontforge -script vertref.pe $(typeface).ttf $(uninamestem)vr ); \
+	fi
+	@echo
+
+	# Create a virtual font `$(sfdnamestem)v' which is a clone of `$(uninamestem)v'.
+	if [ $(vertical) = "yes" ]; \
+	then ( cd $(builddir) && perl clonevf.pl $(uninamestem)v $(sfdnamestem)v ); \
+	fi
+	@echo
+
+	# Temporary fix to create vertical files for gkai and gbsn.
+	# It builds gkaimpv.tfm AND gkaimpv.vp.tfm.  But no vertical form.
+	# Bug to be fixed.
+	if [ $(vertical) = "no" ]; \
+	then ( cp debian/$(sfdnamestem)v.vp debian/$(uninamestem)* $(builddir)/ && \
+	    cd $(builddir) && \
+	    for i in *.uu; do uudecode $$i; done && \
+	    vptovf $(sfdnamestem)v.vp $(sfdnamestem)v.vf $(sfdnamestem)v.tfm && \
+	    pltotf $(uninamestem)v.pl $(uninamestem)v.tfm ); \
+	fi
+
+	# Create virtual fonts `$(sfdnamestem)00' .. `$(sfdnamestem)$(planes)' in $(encoding) encoding
+	# which use Unicode encoded `$(uninamestem)XX' subfonts as raw fonts
+	# and `$(codingscheme)' as the `CODINGSCHEME' parameter value.
+	( cd $(builddir) && perl uni2sfd.pl $(uninamestem) $(sfddir)/$(encoding).sfd $(sfdnamestem) $(codingscheme) )
+	@echo
+
+	# Create entries for the extended font definition file
+	# `c$(nfss_fontencoding)$(namestem).fdx' (which uses $(encoding) encoding), with `$(uninamestem)vr' as
+	# the reference font.
+	( cd $(builddir) && perl makefdx.pl $(uninamestem)vr.afm $(sfddir)/$(encoding).sfd c$(nfss_fontencoding) $(namestem) )
+	@echo
+
+	# Create entries for the extended font definition file
+	# `c70$(namestem).fdx' (which uses Unicode encoding), with `$(uninamestem)vr' as
+	# the reference font.
+	( cd $(builddir) && perl makefdx.pl -u $(uninamestem)vr.afm $(sfddir)/Unicode.sfd c70 $(namestem) )
+	@echo
+
+	# Remove the *.enc files; they're not used.
+	( cd $(builddir) && rm -f *.enc )
+	@echo
+
+	# Create a Type1 font map.
+	@( cd $(builddir) && for filename in *.pfb; do if [ $$filename != "$(uninamestem)vr.pfb" ]; then echo "$$(basename $$filename .pfb) $$(basename $$filename .pfb) <$$filename" >> $(uninamestem).map; fi; done )
+	@echo
+
+	# Create entries for the font definition file
+	# `c$(nfss_fontencoding)$(namestem).fd' (which uses $(encoding) encoding).
+	@cd debian && \
+	    sed -e 's/@NFSS_FONTENCODING@/$(nfss_fontencoding)/g' \
+		-e 's/@NAMESTEM@/$(namestem)/g' \
+		-e 's/@ENCODING@/$(encoding)/g' \
+		-e 's/@FONTENCODING@/$(encoding)/g' \
+		-e 's/@FAMILYNAME@/$(familyname)/g' \
+		-e 's/@SUBNAMESTEM@/$(sfdnamestem)/g' \
+	        -e 's/@PROVIDESFILE@/c$(nfss_fontencoding)$(namestem).fd/g' \
+		font.fd.in > ../$(builddir)/c$(nfss_fontencoding)$(namestem).fd
+	@echo
+
+	# Create entries for the font definition file
+	# `c70$(namestem).fd' (which uses Unicode encoding).
+	@cd debian && \
+	    sed -e 's/@NFSS_FONTENCODING@/70/g' \
+		-e 's/@NAMESTEM@/$(namestem)/g' \
+		-e 's/@ENCODING@/$(encoding)/g' \
+		-e 's/@FONTENCODING@/Unicode/g' \
+		-e 's/@FAMILYNAME@/$(familyname)/g' \
+		-e 's/@SUBNAMESTEM@/$(uninamestem)/g' \
+	        -e 's/@PROVIDESFILE@'/c70$(namestem).fd/g \
+		font.fd.in > ../$(builddir)/c70$(namestem).fd
+	@echo
+
+	touch $@
+
+clean: $(clean_fonts)
+	cat debian/control.stem.in debian/control.font.* > debian/control
+	rm debian/control.font.*
+	dh_testdir debian/font.fd.in debian/latex-cjk/subfonts.pe
+	dh_testroot
+
+	dh_clean
+	rm -rf build/
+
+$(clean_fonts): abbrev = $(patsubst clean_%,%,$@)
+$(clean_fonts): MY_DH_OPTIONS = -p$(bin-package) -P$(d)
+$(clean_fonts):
+# There was a possible race condition here when running with make -j,
+# with >> control. We append to seperate files instead.
+	@cd debian && \
+	    sed -e 's/@TYPEFACE@/$(typeface)/g' \
+		-e 's/@FAMILYNAME@/$(familyname)/g' \
+		control.leaf.in >> control.font.$(bin-package)
+	@cd debian && \
+	    sed -e 's/@ABBREV@/$(abbrev)/g' \
+		-e 's/@FAMILYNAME@/$(familyname)/g' \
+		-e 's/@TYPEFACE@/$(typeface)/g' \
+		copyright.in > $(bin-package).copyright
+	dh_prep $(MY_DH_OPTIONS)
+	rm -f build-stamp.$(abbrev)
+
+install: build $(install_fonts)
+$(install_fonts): abbrev = $(patsubst install_%,%,$@)
+$(install_fonts): MY_DH_OPTIONS = -p$(bin-package) -P$(d)
+$(install_fonts):
+	dh_testdir $(MY_DH_OPTIONS)
+	dh_testroot $(MY_DH_OPTIONS)
+	dh_prep $(MY_DH_OPTIONS)
+	dh_installdirs $(MY_DH_OPTIONS)
+
+binary-indep: build install $(binary_fonts)
+$(binary_fonts): abbrev = $(patsubst binary_%,%,$@)
+$(binary_fonts): MY_DH_OPTIONS = -p$(bin-package) -P$(d)
+$(binary_fonts):
+	dh_testdir $(MY_DH_OPTIONS)
+	dh_testroot $(MY_DH_OPTIONS)
+	dh_installchangelogs $(MY_DH_OPTIONS)
+	dh_installdocs $(MY_DH_OPTIONS)
+	dh_installdocs debian/README.Debian $(MY_DH_OPTIONS)
+	dh_installexamples $(MY_DH_OPTIONS)
+	dh_install $(MY_DH_OPTIONS) $(builddir)/*.afm $(dest_afmpath)/
+	dh_install $(MY_DH_OPTIONS) $(builddir)/$(uninamestem)*.tfm $(dest_uni-tfmpath)/
+	dh_install $(MY_DH_OPTIONS) $(builddir)/$(sfdnamestem)*.tfm $(dest_sfd-tfmpath)/
+	dh_install $(MY_DH_OPTIONS) $(builddir)/*.pfb $(dest_type1path)/
+	dh_install $(MY_DH_OPTIONS) $(builddir)/*.vf $(dest_vfpath)/
+	dh_install $(MY_DH_OPTIONS) $(builddir)/$(uninamestem).map /usr/share/texmf/fonts/map/dvips/arphic/
+	dh_install $(MY_DH_OPTIONS) $(builddir)/c$(nfss_fontencoding)$(namestem).fd* $(dest_fd)/
+	dh_install $(MY_DH_OPTIONS) $(builddir)/c70$(namestem).fd* usr/share/texmf/tex/latex/CJK/UTF8/
+	dh_link $(MY_DH_OPTIONS)
+	dh_installtex $(MY_DH_OPTIONS) --flavor=map:config_for_all_maps map=Map,$(uninamestem).map
+	dh_strip $(MY_DH_OPTIONS)
+	dh_compress $(MY_DH_OPTIONS)
+	dh_fixperms $(MY_DH_OPTIONS)
+	dh_perl $(MY_DH_OPTIONS)
+	dh_installdeb $(MY_DH_OPTIONS)
+	dh_gencontrol $(MY_DH_OPTIONS)
+	dh_md5sums $(MY_DH_OPTIONS)
+	dh_builddeb $(MY_DH_OPTIONS)
+
+
+# Build architecture-dependent files here.
+binary-arch: build install
+# We have nothing to do by default.
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install\
+	build-arch build-indep\
+	$(fonts) $(install_fonts) $(binary_fonts) $(clean_fonts)

@@ -1,0 +1,104 @@
+latex-cjk-chinese-arphic for Debian
+-----------------------------------
+
+[This part will later be moved to an extra document in
+ latex-cjk-common explaining how to get extra fonts.]
+
+Here's a step-by-step explanation what you have to do to obtain GBK
+fonts to be used with CJK.  I assume that you have already installed
+the Unicode TFM/PFB/AFM/VF fonts with the correct .map files.  As
+example I've taken the Arphic "gkai" font, even though it only
+contains GB2312.
+
+  First of all you should install the following packages:
+latex-cjk-common, texlive-font-utils (>= 2007.dfsg.2), texlive-font-utils,
+and of course the Arphic TrueType font "ttf-arphic-gkai00mp" (install
+"ttf-arphic-gbsn00lp" if you want Arphic "gbsn").
+
+  We'll build all the subfonts in a separate directory, then download,
+copy or link all the necessary files and process everything with
+Fontforge.
+
+  $ mkdir ~/gkaigbk; cd ~/gkaigbk
+
+# Copy all the necessary tools to the current directory.
+# Make sure you have the `aglfn' package installed.
+
+  $ sed -e 's/\"aglfn13.txt\"/\"\/usr\/share\/aglfn\/aglfn.txt\"/g' /usr/share/latex-cjk-common/utils/subfonts/makefdx.pl > makefdx.pl
+
+  $ cp /usr/share/latex-cjk-common/utils/subfonts/{clonevf,uni2sfd}.pl .
+
+# If you want vertical glyphs, copy the vertical fonts from the Unicode version.
+  $ cp /usr/share/texmf/fonts/{afm,tfm,type1}/arphic/gkaiu/gkaiu* .
+
+  $ ln -s /usr/share/fonts/truetype/arphic/gkai00mp.ttf
+
+# I'm not sure about the CODINGSCHEME variable in VF; you might try "cjkgbk".
+  $ perl uni2sfd.pl gkaiu /usr/share/texmf-texlive/fonts/sfd/UGBK.sfd gkaigbk cjkgbk
+
+# Vertical fonts.
+  $ perl clonevf.pl gkaiuv gkaigbkv
+
+# The font definition files for the regular and vertical version.
+  $ perl makefdx.pl gkaiuvr.afm /usr/share/texmf-texlive/fonts/sfd/UGBK.sfd c19gkai.fdx
+
+  $ echo "% This is the file c19gkai.fd of the CJK package
+%   for using Asian logographs (Chinese/Japanese/Korean) with LaTeX2e
+%
+% created for CJK Version 4.7.0 (17-Oct-2006).
+
+\def\fileversion{4.7.0}
+\def\filedate{2006/10/17}
+\ProvidesFile{c19gkai.fd}[\filedate\space\fileversion]
+
+% character set: UGBK
+% font encoding: UGBK
+
+% AR PL KaitiM GB
+
+\DeclareFontFamily{C19}{gkai}{\hyphenchar \font\m@ne}
+
+\DeclareFontShape{C19}{gkai}{m}{n}{<-> CJK * gkaigbk}{}
+\DeclareFontShape{C19}{gkai}{bx}{n}{<-> CJKb * gkaigbk}{\CJKbold}
+
+\endinput" > c19gkai.fd
+
+# Now we'll install the fonts into our personal TEXMF directory, which
+# is ~/texmf.  If you want these fonts to be available for every user
+# on your computer, install them in /usr/local/share/texmf/ as root.
+  $ mkdir ~/texmf; cd ~/texmf
+  $ mkdir -p fonts/{tfm,vf}/arphic/gkaigbk tex/latex/CJK/GB
+  $ cp ~/gkaigbk/gkaigbk*.tfm fonts/tfm/arphic/gkaigbk/
+  $ cp ~/gkaigbk/gkaigbk*.vf fonts/vf/arphic/gkaigbk/
+  $ cp ~/gkaigbk/c19gkai.fd* tex/latex/CJK/GB/
+
+# Update the TeX tree.  If you installed the fonts in
+# /usr/local/share/texmf, run the next command as root.
+  $ mktexlsr
+
+
+Now you can use GBK-encoded LaTeX documents with:
+  \begin{CJK*}{GBK}{gkai}
+
+
+ -- Danai SAE-HAN (韓達耐) <danai@debian.org>, Tue, 25 Jun 2013 02:04:33 +0800
+
+
+If you're switching from tfm-arphic-* to latex-cjk-chinese-arphic-*,
+please make sure that you also remove *ALL* PK files in your local
+TEXMF cache directory, which you can find in
+~/.texmf-var/fonts/pk/modeless/arphic/ or something similar.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@edpnet.be>, Sun, 29 Oct 2006 02:07:23 +0100
+
+
+This package contains fonts in different formats built from Arphic
+TrueType Fonts, using the fontforge scripts that are provided in the
+CJK macro for LaTeX.
+  All fonts should appear in xdvi, dvips, dvipdfm(x) and pdflatex
+directly without the need for ttf2pk.  However, xdvi doesn't recognize
+PS rotation (yet), so vertically written characters will show up
+horizontally.  Run dvips or dvipdfm(x) and view the final result with
+gv or evince to view the final result.
+
+ -- Danai SAE-HAN (韓達耐) <danai.sae-han@skynet.be>, Mon, Nov 28 15:22:37 2005

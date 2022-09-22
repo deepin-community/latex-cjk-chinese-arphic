@@ -1,0 +1,51 @@
+  * dh_installtexfonts from the updated tetex-common (>=0.13)
+    automatically adds config.{bsmi,bkai,gbsn,gkai} to dvips.
+    Now "dvips -P bsmi" will also work, even if you have disabled
+    the map files with updmap-sys.  CHECK THIS ONCE MORE.
+    If so, then suggest an addition to the manual pages, if this
+    feature hasn't been explained.
+
+  * Make a new README.Developers file as suggested by Norbert Preining
+    and Frank Küster.  Browse through the tex-maint ML again.
+    This file should help other developers who wish to add fonts for
+    the CJK package.
+    Merge the info about Cyberbit (in "cjk") and Arphic GBK (in this
+    package) into a single README file.
+
+  * Use dpatch, since I have locally changed makefdx.pl to include
+    the \CJKhdef option.
+
+  * Check whether \CJKhdef should be set to -.12em.  Upstream, Werner
+    has set it to -.06em.  Perhaps he used Chinese text with some
+    Latin text in between.
+
+    But problems arise with vertical glyphs.
+
+  * [latex-cjk/makefdx.pl] Make use of CJKhdef, an option to vertically
+     shift the Arphic fonts.  With this option set to -0.12em, Arphic fonts
+     should look alright between Latin text, parentheses and brackets.
+     However, you will need to use "\usepackage{CJKvert}\CJKhorz" in your
+     package in order to get this effect.  This behaviour *might* change
+     in the future, though.  Problem however: normal vertical text also gets
+     shifted horizontally. TODO
+
+  * What to do with the .afm files?  gzip them, or don't install them at all?
+
+  * fontforge -script vertical.pe gbsnu/gkaiu doesn't provide gbsnuv/gkaiuv.
+    Log:
+  fontforge -script vertical.pe gbsn00lp.ttf gbsnuv
+  Copyright (c) 2000-2008 by George Williams.
+   Executable based on sources from 16:34 GMT 30-Mar-2008.
+   Library based on sources from 15:57 GMT 30-Mar-2008.
+  Loading gbsn00lp.ttf...
+  Bad lookup table: format=6, first=65535 total glyphs in font=7764
+  No vertical glyph representation forms found.
+
+  Check Werner Lemberg's postings a few months ago, and see what the problem
+  was with Arphic's GSUB tables (does it even contain them?). TODO
+
+  If nothing can be done, remove vertical support for simplified Chinese.
+  It should bail out cleanly.  Or use a conditional statement to ignore gkai
+  and gbsn.
+
+  BTW, this will be resolved when you switch to Arne Götje's fonts.

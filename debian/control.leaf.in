@@ -1,0 +1,10 @@
+
+Package: latex-cjk-chinese-arphic-@TYPEFACE@
+Architecture: all
+Suggests: fonts-arphic-@TYPEFACE@
+Provides: tfm-arphic-@TYPEFACE@
+Depends: ${misc:Depends}
+Description: @FAMILYNAME@ fonts for CJK
+ This package installs all necessary fonts (PFB, AFM, TFM, etc.) to get
+ the "@FAMILYNAME@" font working with the LaTeX macro "CJK" in local and
+ UTF-8 environments.

@@ -1,0 +1,19 @@
+Source: latex-cjk-chinese-arphic
+Section: tex
+Priority: optional
+Maintainer: Debian TeX maintainers <debian-tex-maint@lists.debian.org>
+Uploaders: Danai SAE-HAN (韓達耐) <danai@debian.org>, Norbert Preining <preining@debian.org>
+Build-Depends: debhelper (>= 9)
+Build-Depends-Indep: aglfn,
+ fontforge (>= 0.0.20050717),
+ tex-common (>= 3),
+ texlive-font-utils (>= 2009-4),
+ fonts-arphic-bsmi00lp,
+ fonts-arphic-bkai00mp,
+ fonts-arphic-gbsn00lp,
+ fonts-arphic-gkai00mp,
+ sharutils
+Standards-Version: 3.9.4
+Vcs-Svn: svn://svn.debian.org/svn/debian-tex/latex-cjk-chinese-arphic/trunk
+Vcs-Browser: http://svn.debian.org/wsvn/debian-tex/latex-cjk-chinese-arphic/trunk/
+Homepage: ftp://ftp.gnu.org/non-gnu/chinese-fonts-truetype/
